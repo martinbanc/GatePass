@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: #e9ecef;
+            margin: 0; 
+            padding-bottom: 210px;
+            color: #333d47; 
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #005f90;
+            font-weight: 500;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #005f90;
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .header { 
+            background-color: #ffffff; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #d5d8db;
+        }
+        .header .logo { height: 40px; }
+        #logout-button { 
+            background-color: #d9534f; 
+            color: white; 
+            border: none; padding: 10px 18px; border-radius: 5px; 
+            cursor: pointer; font-weight: 500;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #logout-button:hover { background-color: #c9302c; }
+        .main-container { padding: 3rem; }
+        .welcome-message { text-align: center; margin-bottom: 3rem; }
+        .welcome-message h1 { font-size: 2.5rem; font-weight: 400; color: #2c3e50; margin: 0 0 0.5rem 0; }
+        .welcome-message h1 strong { font-weight: 700; }
+        .welcome-message p { font-size: 1.1rem; color: #6b7b8c; margin: 0; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 900px; margin: 0 auto; }
+        .menu-item { background-color: #ffffff; border-radius: 10px; border: 1px solid #e0e5e9; text-decoration: none; color: #333d47; text-align: center; padding: 2.5rem 1.5rem; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .menu-item:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0, 95, 144, 0.1); border-color: #005f90; }
+        .icon-wrapper { margin-bottom: 1.5rem; color: #005f90; }
+        .icon { width: 64px; height: 64px; stroke-width: 1.5; }
+        .title { font-size: 1.1rem; font-weight: 600; line-height: 1.4; }
+        .btn-link { padding: 0.6rem 1.2rem; background-color: #005f90; color: white; font-weight: 500; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; transition: background-color 0.2s; }
+        .timeout-modal-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+        .timeout-modal-content { background-color: #fefefe; margin: auto; padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 450px; text-align: center; }
+        .timeout-modal-content h2 { margin-top: 0; color: #005f90; }
+        #session-timeout-button { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div id="logout-overlay" class="overlay">
+        <div class="spinner"></div>
+        Logging out...
+    </div>
+
+    <div class="header">
+        <img src="https://appscript-cdn.co.uk/GatePassProject/approva/Approva_favicon.png" alt="Logo" class="logo">
+        <button id="logout-button" onclick="handleLogout()" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
+            <span>Logout</span>
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="welcome-message">
+            <h1 id="welcome-heading">Loading...</h1>
+            <p>Please select an option below to get started.</p>
+        </div>
+        <div class="menu-grid" id="menu-grid" style="display: none;"></div>
+    </div>
+    
+    <div id="session-timeout-modal" class="timeout-modal-overlay">
+      <div class="timeout-modal-content">
+        <h2>Session Expired</h2>
+        <p>Your session has timed out due to inactivity. Please log in again to continue.</p>
+        <button id="session-timeout-button" class="btn-link">Go to Login</button>
+      </div>
+    </div>
+
+    <div id="debug-console" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); color: #00ff00; font-family: monospace; font-size: 14px; max-height: 200px; overflow-y: auto; padding: 10px; z-index: 99999; border-top: 2px solid #ffc107; line-height: 1.5;">
+        <strong>DEBUG CONSOLE:</strong>
+    </div>
+
+    <script>
+      const debugConsole = document.getElementById('debug-console');
+      function debugLog(message) {
+          const entry = document.createElement('div');
+          entry.innerHTML = `&gt; ${message}`;
+          debugConsole.appendChild(entry);
+          console.log(message);
+      }
+
+      function getUrlParameter(name) {
+          name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+          var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+          var results = regex.exec(window.location.search);
+          return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+    try {
+        debugLog('DOM Content Loaded. Initializing page...');
+        
+        const urlToken = getUrlParameter('token');
+        let sessionToken = urlToken || sessionStorage.getItem('sessionToken');
+
+        if (sessionToken) {
+            if (urlToken) {
+                sessionStorage.setItem('sessionToken', urlToken);
+            }
+            debugLog(`Token is valid. Preparing to call server function getLandingPageData.`);
+            google.script.run
+                .withSuccessHandler(onDataReceived)
+                .withFailureHandler(handleFailure)
+                .getLandingPageData(sessionToken);
+        } else {
+            // No token found, so instead of redirecting automatically, show the modal.
+            debugLog('No valid token found. Showing login modal.');
+            const modal = document.getElementById('session-timeout-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                const modalButton = document.getElementById('session-timeout-button');
+                if (modalButton) {
+                    modalButton.onclick = () => {
+                        window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+                    };
+                }
+            }
+        }
+    } catch (e) {
+        debugLog(`FATAL ERROR in main script block: ${e.message}`);
+    }
+});
+
+      function onDataReceived(data) {
+    try {
+        // This part updates the welcome message
+        const user = data.user;
+        document.getElementById('welcome-heading').innerHTML = `Welcome, <strong>${user.fullName || user.username}</strong>`;
+
+        // ---- TEMPORARY TEST CODE ----
+        // Instead of building menu tiles, we'll just show a success message.
+        const menuGrid = document.getElementById('menu-grid');
+        menuGrid.innerHTML = '<h1 style="color: green; text-align: center;">Test Successful! Data Loaded.</h1>';
+        menuGrid.style.display = 'block';
+        // ---- END OF TEST CODE ----
+
+        document.getElementById('logout-button').style.display = 'flex';
+        debugLog('Simplified test of onDataReceived was successful.');
+
+    } catch (err) {
+        alert('An error occurred inside onDataReceived: ' + err.message);
+        debugLog(`Error inside onDataReceived: ${err.message}`);
+    }
+}
+
+      function handleFailure(error) {
+        const errorMessage = (error && error.message) ? error.message : "An unknown error occurred.";
+        debugLog(`Failure handler (handleFailure) was called. Error: ${errorMessage}`);
+    
+        if (errorMessage.includes("Access Denied") || errorMessage.includes("Authentication failed") || errorMessage.includes("session may have expired")) {
+            sessionStorage.removeItem('sessionToken');
+            const modal = document.getElementById('session-timeout-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                const modalButton = document.getElementById('session-timeout-button');
+                if (modalButton) {
+                    modalButton.onclick = () => {
+                        window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+                    };
+                }
+            }
+        } else {
+            alert('An unexpected error occurred: ' + errorMessage);
+        }
+      }
+
+      function handleLogout() {
+        const token = sessionStorage.getItem('sessionToken');
+        if (!token) { window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>'; return; }
+        const overlay = document.getElementById('logout-overlay');
+        if(overlay) overlay.style.display = 'flex';
+        document.getElementById('logout-button').disabled = true;
+        google.script.run
+          .withSuccessHandler(() => {
+            sessionStorage.removeItem('sessionToken');
+            window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+          })
+          .withFailureHandler((err) => {
+            if(overlay) overlay.style.display = 'none';
+            document.getElementById('logout-button').disabled = false;
+            alert("Logout failed: " + err.message);
+          })
+          .userLogout(token);
+      }
+    </script>
+</body>
+</html>
