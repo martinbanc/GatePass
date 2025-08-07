@@ -165,49 +165,48 @@ function doGet(e) {
     const title = "Approva";
     const page = e.parameter.page;
     if (page === 'redirect' && e.parameter.rt) {
-            const redirectToken = e.parameter.rt;
-            const sessionToken = CacheService.getScriptCache().get(`rt_${redirectToken}`);
-            
-            if (sessionToken) {
-                CacheService.getScriptCache().remove(`rt_${redirectToken}`);
-                
-                const finalUrl = ScriptApp.getService().getUrl() + '?page=Landing&token=' + sessionToken;
-                
-                // This new HTML includes debug info so we can see the generated URL.
-                const html = `
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <base target="_top">
-                        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-                        <style>
-                          body { font-family: 'Roboto', sans-serif; background-color: #eef2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-                          .container { background-color: #fff; padding: 40px 50px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 500px; width: 90%; }
-                          h1 { color: #005f90; margin-top: 0; }
-                          p { color: #555; font-size: 1.1em; line-height: 1.5; }
-                          a { display: inline-block; text-decoration: none; background-color: #28a745; color: white; padding: 14px 28px; border-radius: 5px; font-weight: bold; margin-top: 20px; transition: background-color 0.2s; }
-                          a:hover { background-color: #218838; }
-                          .debug-info { margin-top: 2rem; border-top: 1px solid #ccc; padding-top: 1rem; font-family: monospace; font-size: 12px; color: #888; word-break: break-all; text-align: left;}
-                        </style>
-                      </head>
-                      <body>
-                        <div class="container">
-                          <h1>Authentication Complete</h1>
-                          <p>Please click the button below to proceed securely to the application.</p>
-                          <a href="${finalUrl}">Proceed to Application</a>
-                          <div class="debug-info">
-                            <strong>Debug Info:</strong><br>
-                            Generated URL: ${finalUrl}
-                          </div>
-                        </div>
-                      </body>
-                    </html>`;
-                
-                return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-            } else {
-                return HtmlService.createHtmlOutput('<h1>Redirect Expired</h1><p>Your redirect token was invalid or expired. Please close this tab and log in again.</p>');
-            }
-        }
+      const redirectToken = e.parameter.rt;
+      const sessionToken = CacheService.getScriptCache().get(`rt_${redirectToken}`);
+
+      if (sessionToken) {
+        // Remove the one‑time redirect token.
+        CacheService.getScriptCache().remove(`rt_${redirectToken}`);
+
+        // Build URLs for automatic and fallback navigation.
+        const baseUrl = ScriptApp.getService().getUrl();
+        const landingUrl = baseUrl + '?page=Landing';
+        const fallbackUrl = `${landingUrl}&token=${sessionToken}`;
+
+        // HTML auto‑stores the session token and redirects to the Landing page.
+        const html = [
+          '<!DOCTYPE html>',
+          '<html>',
+          '  <head>',
+          '    <base target="_top">',
+          '    <script>',
+          '      (function() {',
+          '        try {',
+          `          sessionStorage.setItem('sessionToken', '${sessionToken}');`,
+          `          window.top.location.replace('${landingUrl}');`,
+          '        } catch (err) {',
+          `          window.top.location.href = '${fallbackUrl}';`,
+          '        }',
+          '      })();',
+          '    </script>',
+          '  </head>',
+          '  <body>',
+          '    <p>Redirecting to application…</p>',
+          `    <p>If you are not redirected, <a href="${fallbackUrl}">click here</a>.</p>`,
+          '  </body>',
+          '</html>'
+        ].join('\n');
+
+        return HtmlService.createHtmlOutput(html)
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+      } else {
+        return HtmlService.createHtmlOutput('<h1>Redirect Expired</h1><p>Your redirect token was invalid or expired. Please close this tab and log in again.</p>');
+      }
+    }
     const locationIdentifier = e.parameter.location;
     if (page === 'approve') {
       const token = e.parameter.token;
