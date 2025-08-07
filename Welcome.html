@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body { font-family: 'Roboto', sans-serif; background-color: #e9ecef; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+    .container { background: #fff; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 960px; width: 100%; text-align: center; }
+    .app-header { display: flex; justify-content: center; align-items: center; margin-bottom: 1.5rem; gap: 15px; }
+    #app-title { font-size: 2.2em; font-weight: 700; color: #005f90; }
+    #app-logo { height: 48px; }
+    .location-header { padding: 12px 20px; color: #fff; border-radius: 8px; background-color: #005f90; margin-bottom: 2rem; font-size: 1.3em; font-weight: 500; }
+    .welcome-message h2 { font-size: 1.6em; color: #333; margin-bottom: 0.5rem; }
+    .welcome-message p { color: #555; font-size: 1.1em; margin-bottom: 3rem; }
+    .menu-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+    @media (min-width: 600px) { .menu-grid { grid-template-columns: repeat(2, 1fr); } }
+    .menu-item { background-color: #f8f9fa; border: 1px solid #e0e5e9; border-radius: 10px; padding: 2.5rem 1.5rem; text-decoration: none; color: #333d47; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .menu-item:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0, 95, 144, 0.12); border-color: #005f90; }
+    .icon-wrapper { margin-bottom: 1.5rem; color: #005f90; }
+    .icon { width: 56px; height: 56px; stroke-width: 1.5; }
+    .title { font-size: 1.2rem; font-weight: 600; line-height: 1.4; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="app-header"> <img id="app-logo" src="https://appscript-cdn.co.uk/GatePassProject/approva/Approva_favicon.png" alt="Approva Logo"> <h1 id="app-title">Approva Gate Pass</h1> </div>
+    <div class="location-header">Location: <?!= location.name ?></div>
+    <div class="welcome-message"> <h2>Welcome</h2> <p>Please select the pass you wish to create.</p> </div>
+    <div class="menu-grid">
+      <a href="<?!= webAppUrl ?>?location=<?!= location.identifier ?>&formType=leaving" class="menu-item">
+        <div class="icon-wrapper">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+          </svg>
+        </div>
+        <div class="title">Create Pass:<br>Items Leaving Site</div>
+      </a>
+      <a href="<?!= webAppUrl ?>?location=<?!= location.identifier ?>&formType=entering" class="menu-item">
+        <div class="icon-wrapper">
+           <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+           </svg>
+        </div>
+        <div class="title">Create Pass:<br>Items Entering Site</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
