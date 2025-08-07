@@ -127,11 +127,15 @@
         const urlToken = getUrlParameter('token');
         let sessionToken = urlToken || sessionStorage.getItem('sessionToken');
 
+        if (urlToken) {
+            debugLog('Session token found in URL. Saving to sessionStorage.');
+            sessionStorage.setItem('sessionToken', urlToken);
+        } else if (sessionToken) {
+            debugLog('Session token loaded from sessionStorage.');
+        }
+
         if (sessionToken) {
-            if (urlToken) {
-                sessionStorage.setItem('sessionToken', urlToken);
-            }
-            debugLog(`Token is valid. Preparing to call server function getLandingPageData.`);
+            debugLog('Token is valid. Preparing to call server function getLandingPageData.');
             google.script.run
                 .withSuccessHandler(onDataReceived)
                 .withFailureHandler(handleFailure)
