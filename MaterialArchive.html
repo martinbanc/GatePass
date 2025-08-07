@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+    }
+    .header {
+      background-color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      position: relative;
+    }
+    .header .logo {
+      height: 35px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #005f90;
+      font-weight: 500;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      background-color: #005f90;
+      color: #ffffff;
+      font-weight: 500;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s;
+    }
+    .btn:hover {
+      background-color: #004c73;
+    }
+    .main-content {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .search-container {
+      margin-bottom: 2rem;
+    }
+    #search-bar {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .material-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .material-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    }
+    .card-image-container {
+      width: 100%;
+      height: 200px;
+      background-color: #e9ecef;
+    }
+    .card-image {
+      width: 100%;
+      height: 100%;
+      border: none;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 1rem;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin: 0 0 0.5rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-tags {
+      font-size: 0.9rem;
+      color: #6c757d;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .loader {
+        text-align: center;
+        padding: 2rem;
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #dee2e6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+        font-size: 1.5rem;
+        color: #005f90;
+        margin: 0;
+    }
+    .close-button {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close-button:hover, .close-button:focus {
+      color: black;
+    }
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .modal-body {
+        grid-template-columns: 40% 1fr;
+      }
+    }
+    #modal-image-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+    #modal-image-container a {
+        display: block;
+        cursor: zoom-in;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 100px;
+    }
+    .modal-image-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .modal-details {
+      font-size: 1rem;
+    }
+    .detail-item {
+        background-color: #f8f9fa;
+        padding: 0.75rem 1rem;
+        border-radius: 5px;
+        margin-bottom: 0.75rem;
+    }
+    .detail-item strong {
+        display: block;
+        color: #005f90;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+    }
+    /* Styles for the session timeout modal */
+    .timeout-modal-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+    .timeout-modal-content { background-color: #fefefe; margin: auto; padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 450px; text-align: center; }
+    .timeout-modal-content h2 { margin-top: 0; color: #005f90; }
+    #session-timeout-button { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://appscript-cdn.co.uk/GatePassProject/approva/Approva_favicon.png" alt="Approva Logo" class="logo">
+    <h1>Material Archive</h1>
+    <a href="<?= ScriptApp.getService().getUrl() ?>?page=Landing" class="btn">Main Menu</a>
+  </div>
+
+  <div class="main-content">
+    <div class="search-container">
+      <input type="text" id="search-bar" placeholder="Search by name, description, or tag..." onkeyup="handleSearch()">
+    </div>
+    <div id="results-container" class="results-grid">
+        <div class="loader" id="loader">Loading materials...</div>
+    </div>
+  </div>
+
+  <div id="material-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">Material Details</h2>
+        <span class="close-button" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="modal-image-container"></div>
+        <div id="modal-details" class="modal-details"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="session-timeout-modal" class="timeout-modal-overlay">
+    <div class="timeout-modal-content">
+      <h2>Session Expired</h2>
+      <p>Your session has timed out due to inactivity. Please log in again to continue.</p>
+      <button id="session-timeout-button" class="btn">Go to Login</button>
+    </div>
+  </div>
+
+  <script>
+    const resultsContainer = document.getElementById('results-container');
+    const loader = document.getElementById('loader');
+    const modal = document.getElementById('material-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalImageContainer = document.getElementById('modal-image-container');
+    const modalDetails = document.getElementById('modal-details');
+    let searchTimeout;
+    let allMaterials = [];
+    let sessionToken = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        sessionToken = sessionStorage.getItem('sessionToken');
+        if (!sessionToken) {
+    const modal = document.getElementById('session-timeout-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const modalButton = document.getElementById('session-timeout-button');
+        if (modalButton) {
+            modalButton.onclick = () => {
+                window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+            };
+        }
+    }
+    return; // Stop the rest of the script from running
+}
+        loadAllMaterials();
+    });
+    
+    function handleSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase().trim();
+            const filtered = allMaterials.filter(material => {
+                if (!searchTerm) return true;
+                return material.name.toLowerCase().includes(searchTerm) ||
+                       material.description.toLowerCase().includes(searchTerm) ||
+                       material.tags.toLowerCase().includes(searchTerm);
+            });
+            displayResults(filtered);
+        }, 300);
+    }
+
+    function loadAllMaterials() {
+        loader.style.display = 'block';
+        resultsContainer.innerHTML = '';
+        resultsContainer.appendChild(loader);
+
+        google.script.run
+            .withSuccessHandler(data => {
+                allMaterials = data;
+                displayResults(allMaterials);
+            })
+            .withFailureHandler(handleFailure)
+            .searchMaterials(sessionToken, '');
+    }
+
+    function displayResults(materials) {
+        loader.style.display = 'none';
+        resultsContainer.innerHTML = '';
+        if (!materials || materials.length === 0) {
+            resultsContainer.innerHTML = '<p>No materials found.</p>';
+            return;
+        }
+
+        materials.forEach(material => {
+            const card = document.createElement('div');
+            card.className = 'material-card';
+            card.onclick = () => openModal(material);
+
+            const imageIds = (material.driveId || '').split(',').filter(Boolean);
+            const firstImageId = imageIds[0];
+
+            const imagePreview = firstImageId
+                ? `<div class="card-image-container"><iframe src="https://drive.google.com/file/d/${firstImageId}/preview" class="card-image"></iframe></div>`
+                : `<div class="card-image-container"><img src="https://www.gstatic.com/images/icons/material/system/2x/photo_camera_grey600_48dp.png" class="card-image" style="object-fit:scale-down;" alt="No Image"></div>`;
+
+            card.innerHTML = `
+                ${imagePreview}
+                <div class="card-content">
+                    <h3 class="card-title">${material.name}</h3>
+                    <p class="card-tags">Tags: ${material.tags || 'None'}</p>
+                </div>
+            `;
+            resultsContainer.appendChild(card);
+        });
+    }
+    
+    function handleFailure(err) {
+        loader.style.display = 'none';
+        resultsContainer.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+
+        if (err.message.includes("Access Denied") || err.message.includes("Authentication failed") || err.message.includes("session may have expired")) {
+            sessionStorage.removeItem('sessionToken');
+            const sessionModal = document.getElementById('session-timeout-modal');
+            if (sessionModal) {
+                sessionModal.style.display = 'flex';
+                document.getElementById('session-timeout-button').onclick = () => {
+                    window.top.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+                };
+            }
+        }
+    }
+
+    function openModal(material) {
+        modalTitle.textContent = material.name;
+        
+        modalImageContainer.innerHTML = '';
+        const imageIds = (material.driveId || '').split(',').filter(Boolean);
+
+        if (imageIds.length > 0) {
+            imageIds.forEach(id => {
+                const fullImageUrl = `https://drive.google.com/uc?id=${id}`;
+                const imageLink = document.createElement('a');
+                imageLink.href = fullImageUrl;
+                imageLink.target = '_blank';
+                imageLink.title = 'Click to open full image in a new tab';
+                imageLink.innerHTML = `<iframe class="modal-image-frame" src="https://drive.google.com/file/d/${id}/preview"></iframe>`;
+                modalImageContainer.appendChild(imageLink);
+            });
+        } else {
+            modalImageContainer.innerHTML = '<p>No images attached.</p>';
+        }
+
+        modalDetails.innerHTML = '';
+        try {
+            const details = JSON.parse(material.fullDetails);
+            for (const key in details) {
+                if (key !== 'Image IDs' && key !== 'Items' && details[key]) {
+                    const detailElement = document.createElement('div');
+                    detailElement.className = 'detail-item';
+                    
+                    const label = document.createElement('strong');
+                    label.textContent = key.replace(/ - Answer/g, '').replace(/_/g, ' ');
+                    
+                    const value = document.createElement('span');
+                    value.textContent = details[key];
+                    
+                    detailElement.appendChild(label);
+                    detailElement.appendChild(value);
+                    modalDetails.appendChild(detailElement);
+                }
+            }
+        } catch(e) {
+            modalDetails.innerHTML = '<p>Could not load full details.</p>';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+  </script>
+</body>
+</html>
