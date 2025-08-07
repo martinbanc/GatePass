@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+            box-sizing: border-box;
+            color: #333d47;
+        }
+
+        .container {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 15px;
+        }
+
+        #app-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #005f90;
+        }
+
+        #app-logo {
+            height: 48px;
+        }
+
+        .location-header {
+            padding: 12px 20px;
+            color: #fff;
+            border-radius: 8px;
+            background-color: #005f90;
+            margin-bottom: 2rem;
+            font-size: 1.3em;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        h2, h4, h5 {
+            text-align: left;
+            color: #005f90;
+            border-bottom: 2px solid #f0f2f5;
+            padding-bottom: 10px;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.4em;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .detail-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e5e9;
+            border-radius: 10px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-item strong {
+            color: #005f90;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item span {
+            font-size: 1.1em;
+            color: #333d47;
+            word-wrap: break-word;
+        }
+
+        .actions-container {
+            position: relative;
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #f0f2f5;
+        }
+        
+        .comments-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .comments-section label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .comments-section textarea, .comments-section input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .comments-section textarea {
+             min-height: 90px;
+        }
+
+        .comments-section textarea:focus, .comments-section input:focus {
+            outline: none;
+            border-color: #005f90;
+        }
+        
+        .actions-container button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .actions-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #approve-btn { background-color: #28a745; color: white; }
+        #reject-btn { background-color: #dc3545; color: white; }
+        #reassign-btn, #toggle-reassign-btn { background-color: #ffc107; color: #212529; }
+        
+        #reassign-section {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            background-color: #fffbe6;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ffe58f;
+        }
+
+        .message-box {
+            padding: 15px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .message-box.success { background-color: #e8f5e9; color: #2e7d32; }
+        .message-box.error { background-color: #ffebee; color: #c62828; }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        #loader-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 8px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #005f90;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <? if (data.success) { ?>
+            <div class="app-header">
+                <img id="app-logo" src="https://appscript-cdn.co.uk/GatePassProject/approva/Approva_favicon.png" alt="Approva Logo">
+                <h1 id="app-title">Approva Gate Pass</h1>
+            </div>
+            <div class="location-header">Approval Request for: <?= data.requestDetails.Location ?></div>
+            
+            <div id="message-area"></div>
+             
+            <div id="main-form">
+                <h2>Pass Details</h2>
+                <div class="details-grid">
+                  <? var details = data.requestDetails; ?>
+                  <? for (var key in details) { ?>
+                    <? if (key !== 'Location' && key !== 'Items' && typeof details[key] !== 'object' && details[key]) { ?>
+                      <div class="detail-item">
+                        <strong><?= key.replace(/ - Answer/g, '').replace(/_/g, ' ') ?></strong>
+                        <span><?= details[key] ?></span>
+                      </div>
+                    <? } ?>
+                  <? } ?>
+                </div>
+     
+                <? if (details.Items && details.Items.length > 0) { ?>
+                    <h2>Items to Archive</h2>
+                    <? details.Items.forEach(function(item, index) { ?>
+                        <div class="item-card" style="border:1px solid #e0e5e9; border-radius:10px; padding: 20px; margin-bottom: 20px;">
+                            <h4>Item <?= index + 1 ?> Details</h4>
+                            <div class="details-grid">
+                                <? for (var key in item) { ?>
+                                    <? if (key !== 'spreadsheetRow' && key !== 'images') { ?>
+                                        <div class="detail-item"><strong><?= key ?></strong><span><?= item[key] ?></span></div>
+                                    <? } ?>
+                                <? } ?>
+                            </div>
+                            
+                            <h5>Attached Images</h5>
+                            <div class="image-gallery">
+                                <? if (item.images && item.images.length > 0) { ?>
+                                    <? item.images.forEach(function(id) { ?>
+                                        <iframe src="https://drive.google.com/file/d/<?= id ?>/preview" style="width:100%; height:180px; border:1px solid #ddd; border-radius:8px;"></iframe>
+                                    <? }); ?>
+                                <? } else { ?>
+                                    <p>No images for this item.</p>
+                                <? } ?>
+                            </div>
+                            
+                            <div class="comments-section" style="margin-top: 20px;">
+                                <label for="tags-for-row-<?= item.spreadsheetRow ?>">Archive Tags (Optional, comma-separated)</label>
+                                <input type="text" id="tags-for-row-<?= item.spreadsheetRow ?>" class="item-tags-input" data-row="<?= item.spreadsheetRow ?>" placeholder="e.g., Scrap, Copper Cable, Unit 15">
+                            </div>
+                        </div>
+                    <? }); ?>
+                <? } ?>
+                 
+                <div class="actions-container" id="actions">
+                    <div id="loader-overlay" style="display: none;"><div class="spinner"></div><p>Processing...</p></div>
+                    <div class="comments-section">
+                        <label for="approval-comments">Approval/Rejection Comments</label>
+                        <textarea id="approval-comments" placeholder="Add rejection reason or other comments..."></textarea>
+                    </div>
+                    <button id="approve-btn" onclick="handleAction('Approved')">Approve</button>
+                    <button id="reject-btn" onclick="handleAction('Rejected')">Reject</button>
+                    <button id="toggle-reassign-btn" onclick="toggleReassign()">Re-assign</button>
+     
+                    <div id="reassign-section">
+                        <select id="reassign-select">
+                            <option value="">-- Select new approver --</option>
+                            <? if (data.otherApprovers) { ?>
+                              <? for (var approver of data.otherApprovers) { ?>
+                                <option value="<?= approver.email ?>"><?= approver.fullName ?> (<?= approver.email ?>)</option>
+                              <? } ?>
+                            <? } ?>
+                        </select>
+                        <button id="reassign-btn" onclick="handleReassign()">Confirm Re-assignment</button>
+                    </div>
+                </div>
+            </div>
+        <? } else { ?>
+            <div class="app-header">
+                <img id="app-logo" src="https://appscript-cdn.co.uk/GatePassProject/approva/Approva_favicon.png" alt="Approva Logo">
+                <h1 id="app-title">An Error Occurred</h1>
+            </div>
+            <div class="message-box error"><?= data.message ?></div>
+        <? } ?>
+    </div>
+
+    <script>
+        const token = "<?= (typeof data !== 'undefined' && data.success) ? data.token : '' ?>";
+
+        function showMessage(text, type) {
+            const messageArea = document.getElementById('message-area');
+            if (messageArea) {
+                messageArea.innerHTML = `<div class="message-box ${type === 'success' ? 'success' : 'error'}">${text}</div>`;
+            }
+            const mainForm = document.getElementById('main-form');
+            if (mainForm) {
+                mainForm.style.display = 'none';
+            }
+        }
+
+        function handleAction(action) {
+            document.getElementById('loader-overlay').style.display = 'flex';
+            const comments = document.getElementById('approval-comments').value;
+
+            // Collect tags from all item-specific input fields
+            const tagsByRow = {};
+            const tagInputs = document.querySelectorAll('.item-tags-input');
+            tagInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    // Create a map of { spreadsheetRow: 'tags for that row' }
+                    tagsByRow[input.dataset.row] = input.value;
+                }
+            });
+
+            if (action === 'Rejected' && !comments.trim()) {
+                alert('Comments are required to reject a request.');
+                document.getElementById('loader-overlay').style.display = 'none';
+                return;
+            }
+            document.getElementById('approve-btn').disabled = true;
+            document.getElementById('reject-btn').disabled = true;
+            
+            google.script.run
+                .withSuccessHandler(response => {
+                    if (response && response.success) {
+                        showMessage(response.message, 'success');
+                    } else {
+                        showMessage(response ? response.message : 'An unknown error occurred.', 'error');
+                    }
+                })
+                .withFailureHandler(err => showMessage(err.message, 'error'))
+                // Pass the new tagsByRow object instead of a single tag string
+                .processApproval(action, token, comments, tagsByRow);
+        }
+
+        function toggleReassign() {
+            const section = document.getElementById('reassign-section');
+            if (section) {
+                section.style.display = section.style.display === 'flex' ? 'none' : 'flex';
+            }
+        }
+
+        function handleReassign() {
+            document.getElementById('loader-overlay').style.display = 'flex';
+            const newApproverEmail = document.getElementById('reassign-select').value;
+            if (!newApproverEmail) {
+                alert('Please select an approver from the list.');
+                document.getElementById('loader-overlay').style.display = 'none';
+                return;
+            }
+            document.getElementById('reassign-btn').disabled = true;
+            google.script.run
+                .withSuccessHandler(response => {
+                    if (response && response.success) {
+                        showMessage(response.message, 'success');
+                    } else {
+                        showMessage(response ? response.message : 'An unknown error occurred.', 'error');
+                    }
+                })
+                .withFailureHandler(err => showMessage(err.message, 'error'))
+                .processReassignment(token, newApproverEmail);
+        }
+    </script>
+</body>
+</html>
