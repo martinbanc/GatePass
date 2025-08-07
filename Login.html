@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #005f90;
+            --primary-color-dark: #004c73;
+            --light-bg: #eef2f5;
+            --text-color: #333;
+            --label-color: #555;
+            --border-color: #ccc;
+            --error-bg: #ffebee;
+            --error-text: #c62828;
+            --error-border: #ef9a9a;
+        }
+
+        body { font-family: 'Roboto', sans-serif; background-color: var(--light-bg); margin: 0; color: var(--text-color); }
+        
+        .login-view-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 20px; }
+        .login-container { 
+            background-color: #fff; 
+            padding: 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 380px; 
+        }
+        .login-container img { height: 50px; margin-bottom: 20px; }
+        .login-container h1 { color: var(--primary-color); margin-bottom: 25px; font-size: 1.8em; font-weight: 700; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--label-color); font-size: 0.9em; }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            font-size: 1em; 
+            box-sizing: border-box; 
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 95, 144, 0.15);
+        }
+        .form-button { 
+            width: 100%; 
+            padding: 12px; 
+            font-size: 1.1em; 
+            font-weight: bold; 
+            color: #fff; 
+            background-color: var(--primary-color); 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            transition: background-color 0.2s; 
+            margin-top: 10px; 
+        }
+        .form-button:hover { background-color: var(--primary-color-dark); }
+        .form-button:disabled { background-color: #a0a0a0; cursor: not-allowed; }
+        
+        .message { margin-top: 15px; font-weight: bold; min-height: 1.2em; color: var(--error-text); }
+        .error-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid var(--error-border);
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        .form-hint {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 8px;
+            text-align: left;
+        }
+
+        .modal { 
+            position: fixed; 
+            z-index: 1001; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.6);
+            display: none; 
+            align-items: center; 
+            justify-content: center;
+        }
+        .modal.visible { display: flex; }
+
+        .modal-content { 
+            background-color: #fff; 
+            padding: 30px 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+            width: 90%; 
+            max-width: 420px; 
+            text-align: center;
+        }
+
+        .modal-header { margin-bottom: 25px; }
+        .modal-header .icon {
+            width: 48px;
+            height: 48px;
+            stroke-width: 1.5;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .modal-header h2 { margin: 0 0 10px 0; font-size: 1.6em; color: var(--text-color); font-weight: 700; }
+        .modal-header p { margin: 0; color: var(--label-color); line-height: 1.5; }
+
+    </style>
+</head>
+<body>
+    <div id="login-view" class="login-view-container">
+        <div id="login-container" class="login-container">
+            <img src="https://www.aus.com/sites/default/files/Allied%20Universal%20Tagline_1.png" alt="Allied Universal Logo">
+            <h1>Gatehouse Access</h1>
+            <form id="login-form" onsubmit="submitLogin(); return false;">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" id="login-button" class="form-button">Login</button>
+                <p id="message" class="message"><?= typeof message !== 'undefined' ? message : '' ?></p>
+                <div id="login-debug" style="text-align: left; font-family: monospace; font-size: 12px; color: #333; background: #f0f0f0; border: 1px solid #ccc; padding: 10px; margin-top: 15px; display: none; word-wrap: break-word;"><strong>Debug Info:</strong></div>
+            </form>
+        </div>
+
+        <div id="login-success-container" class="login-container" style="display: none; text-align: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16" style="color: #28a745; margin-bottom: 1rem;">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+            </svg>
+            <h2 style="margin-bottom: 1rem;">Login Successful</h2>
+            <p style="margin-bottom: 2rem; font-size: 1.1em; color: #555;">Click the button below to continue to the application.</p>
+            <a id="continue-button" href="#" class="form-button" style="text-decoration: none; display: block; padding: 12px 0;">Continue to App</a>
+        </div>
+    </div>
+
+    <div id="change-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                </svg>
+                <h2>Create New Password</h2>
+                <p>For your security, you must create a new password before you can proceed.</p>
+            </div>
+            <form id="change-password-form" onsubmit="handleChangePassword(event); return false;">
+                <input type="hidden" id="change-password-username">
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required minlength="8">
+                    <p class="form-hint">Must be at least 8 characters long.</p>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <button type="submit" id="change-password-button" class="form-button">Set New Password & Login</button>
+                <p id="change-password-message" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    const loginButton = document.getElementById('login-button');
+    const changePasswordModal = document.getElementById('change-password-modal');
+    const changePasswordMsgDiv = document.getElementById('change-password-message');
+    const debugDiv = document.getElementById('login-debug');
+
+    function showPasswordModal(username) {
+        document.getElementById('change-password-username').value = username;
+        changePasswordModal.classList.add('visible');
+    }
+
+    function hidePasswordModal() {
+        changePasswordModal.classList.remove('visible');
+    }
+
+    function submitLogin() {
+        debugDiv.style.display = 'block';
+        debugDiv.innerHTML = '<strong>Debug Info:</strong><br/>- Login button clicked. Calling server...';
+
+        const credentials = {
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+        };
+
+        loginButton.disabled = true;
+        loginButton.textContent = 'Logging In...';
+        document.getElementById('message').textContent = '';
+
+        google.script.run
+            .withSuccessHandler(response => {
+                debugDiv.innerHTML += `<br/>- Success handler fired.`;
+                debugDiv.innerHTML += `<br/>- Server response: ${JSON.stringify(response)}`;
+
+                if (response && response.success) {
+                    if (response.forceChange) {
+                        debugDiv.innerHTML += `<br/>- Force password change required.`;
+                        showPasswordModal(response.username);
+                        loginButton.disabled = false;
+                        loginButton.textContent = 'Login';
+                    } else if (response.redirectToken) {
+                        debugDiv.innerHTML += `<br/>- Redirect Token found. Showing success panel.`;
+                        
+                        document.getElementById('login-container').style.display = 'none';
+
+                        const continueUrl = '<?= ScriptApp.getService().getUrl() ?>?page=redirect&rt=' + response.redirectToken;
+                        document.getElementById('continue-button').href = continueUrl;
+
+                        document.getElementById('login-success-container').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('message').textContent = response ? response.message : 'Login failed.';
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Login';
+                }
+            })
+            .withFailureHandler(err => {
+                debugDiv.innerHTML += `<br/>- Failure handler fired. Error: ${err.message}`;
+                document.getElementById('message').textContent = 'An unexpected error occurred: ' + err.message;
+                loginButton.disabled = false;
+                loginButton.textContent = 'Login';
+            })
+            .userLogin(credentials);
+    }
+
+    function handleChangePassword(e) {
+        if (e) e.preventDefault();
+        
+        changePasswordMsgDiv.style.display = 'none';
+        changePasswordMsgDiv.textContent = '';
+        const newPass = document.getElementById('new-password').value;
+        const confirmPass = document.getElementById('confirm-password').value;
+        const username = document.getElementById('change-password-username').value;
+        if (newPass.length < 8) {
+          changePasswordMsgDiv.textContent = 'Password must be at least 8 characters long.';
+          changePasswordMsgDiv.style.display = 'block';
+          return;
+        }
+        if (newPass !== confirmPass) {
+          changePasswordMsgDiv.textContent = 'Passwords do not match.';
+          changePasswordMsgDiv.style.display = 'block';
+          return;
+        }
+        const btn = document.getElementById('change-password-button');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        const data = { username: username, newPassword: newPass };
+        google.script.run
+            .withSuccessHandler(response => {
+                if (response.success && response.redirectToken) {
+                    hidePasswordModal();
+                    // This also needs to follow the new pattern
+                    document.getElementById('login-container').style.display = 'none';
+                    const continueUrl = '<?= ScriptApp.getService().getUrl() ?>?page=redirect&rt=' + response.redirectToken;
+                    document.getElementById('continue-button').href = continueUrl;
+                    document.getElementById('login-success-container').style.display = 'block';
+                } else {
+                    const msg = response.message || "An unknown error occurred.";
+                    changePasswordMsgDiv.textContent = msg;
+                    changePasswordMsgDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Set New Password & Login';
+                }
+            })
+            .withFailureHandler(err => {
+                changePasswordMsgDiv.textContent = 'Error: ' + err.message;
+                changePasswordMsgDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Set New Password & Login';
+            })
+            .forceChangePassword(data);
+    }
+</script>
+</body>
+</html>
